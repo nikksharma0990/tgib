@@ -1,26 +1,47 @@
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from 'react';
 import { MessageCircle, ArrowDown } from 'lucide-react';
 import heroImage from '@/assets/hero-restaurant.jpg';
 
 const HeroSection = () => {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"]
+  });
+
+  // Subtle parallax - background moves slower than scroll
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
+  const backgroundScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
+  
+  // Text moves slightly faster, creating depth
+  const textY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1, 0]);
+
   const handleWhatsApp = () => {
     window.open('https://wa.me/919876543210?text=Hi, I would like to reserve a table at TGIB', '_blank');
   };
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center">
-      {/* Background Image */}
-      <div className="absolute inset-0">
+    <section ref={ref} id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Parallax Background Image */}
+      <motion.div 
+        className="absolute inset-0 will-change-transform"
+        style={{ y: backgroundY, scale: backgroundScale }}
+      >
         <img
           src={heroImage}
           alt="TGIB Restaurant Ambience"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-foreground/50 via-foreground/60 to-foreground/80" />
-      </div>
+      </motion.div>
 
-      {/* Content */}
-      <div className="container-custom relative z-10 pt-24 pb-16 text-center">
+      {/* Content with subtle parallax */}
+      <motion.div 
+        className="container-custom relative z-10 pt-24 pb-16 text-center will-change-transform"
+        style={{ y: textY, opacity }}
+      >
         <div className="max-w-4xl mx-auto">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -73,14 +94,14 @@ const HeroSection = () => {
             </button>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Scroll indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2 }}
-        className="absolute bottom-12 left-1/2 -translate-x-1/2"
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10"
       >
         <motion.div
           animate={{ y: [0, 8, 0] }}
